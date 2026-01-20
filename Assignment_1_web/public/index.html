@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Key-Value Store (Web)</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <h1>Key-Value Store (Web)</h1>
+        <p>
+          Each browser session has its own store. Open a private/incognito
+          window to simulate a different client.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h2>Put</h2>
+        <form id="put-form" class="form-grid">
+          <label>
+            Key
+            <input id="put-key" name="key" required />
+          </label>
+          <label>
+            Value
+            <input id="put-value" name="value" required />
+          </label>
+          <button type="submit">Put</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Get</h2>
+        <form id="get-form" class="form-grid">
+          <label>
+            Key
+            <input id="get-key" name="key" required />
+          </label>
+          <button type="submit">Get</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Responses</h2>
+        <pre id="log" aria-live="polite"></pre>
+      </section>
+    </main>
+
+    <script src="main.js"></script>
+  </body>
+</html>

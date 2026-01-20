@@ -1,0 +1,15 @@
+{
+  "name": "assignment-1-web",
+  "version": "1.0.0",
+  "description": "Web version of the TCP key-value store using Node.js and a browser client.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
