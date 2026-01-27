@@ -3,6 +3,7 @@ package Assignment_1;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
+// import java.net.InetSocketAddress;
 
 public class Client {
 
@@ -17,7 +18,8 @@ public class Client {
         int port = Integer.parseInt(args[1]);
 
         try {
-            Socket socket = new Socket(ip, port);
+            Socket socket = new Socket();
+            socket.connect(new java.net.InetSocketAddress(ip, port), 5000); // 5 second timeout
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             DataInputStream in = new DataInputStream(socket.getInputStream());
 
@@ -32,9 +34,11 @@ public class Client {
             // Read response(s)
             while (true) {
                 String response = in.readUTF();
-                if (response.equals("END")) break;
+                if (response.equals("END"))
+                    break;
                 System.out.println(response);
-                if (in.available() == 0) break;
+                if (in.available() == 0)
+                    break;
             }
 
             socket.close();

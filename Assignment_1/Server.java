@@ -1,7 +1,7 @@
 package Assignment_1;
 
-
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -12,15 +12,14 @@ public class Server {
 
     public Server(int port) {
         try {
-            ss = new ServerSocket(port);
+            ss = new ServerSocket(port, 50, InetAddress.getByName("0.0.0.0"));
             System.out.println("Server started on port " + port);
 
             while (true) {
                 Socket s = ss.accept();
                 System.out.println(
-                    "Client connected: " +
-                    s.getInetAddress().getHostAddress() + ":" + s.getPort()
-                );
+                        "Client connected: " +
+                                s.getInetAddress().getHostAddress() + ":" + s.getPort());
 
                 new ClientHandler(s, memoryUnit).start();
             }

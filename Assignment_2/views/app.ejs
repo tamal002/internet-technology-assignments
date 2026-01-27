@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Photo Sharing App</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <h1>📸 Photo Sharing</h1>
+          <div class="user-info">
+            <span id="currentUsername"></span>
+            <button id="logoutBtn" class="btn-secondary">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+          <div class="sidebar-section">
+            <h3>Upload Photo</h3>
+            <form id="uploadForm" enctype="multipart/form-data">
+              <input type="file" id="photoInput" accept="image/*" required />
+              <input
+                type="text"
+                id="captionInput"
+                placeholder="Add a caption..."
+                maxlength="200"
+              />
+
+              <select id="groupSelect">
+                <option value="all">Share with Everyone</option>
+              </select>
+
+              <button type="submit" class="btn-primary">Upload</button>
+            </form>
+          </div>
+
+          <div class="sidebar-section">
+            <h3>Groups</h3>
+            <div class="group-actions">
+              <input
+                type="text"
+                id="newGroupInput"
+                placeholder="New group name"
+              />
+              <button id="createGroupBtn" class="btn-secondary">Create</button>
+            </div>
+            <div id="groupsList" class="groups-list"></div>
+          </div>
+
+          <div class="sidebar-section">
+            <h3>Online Users (<span id="userCount">0</span>)</h3>
+            <div id="usersList" class="users-list"></div>
+          </div>
+        </aside>
+
+        <!-- Photo Feed -->
+        <main class="photo-feed">
+          <div class="feed-header">
+            <h2>Photo Feed</h2>
+            <div class="filter-buttons">
+              <button class="filter-btn active" data-filter="all">
+                All Photos
+              </button>
+              <button class="filter-btn" data-filter="groups">My Groups</button>
+            </div>
+          </div>
+
+          <div id="photoGrid" class="photo-grid"></div>
+
+          <div id="noPhotos" class="no-photos">
+            <p>No photos yet. Be the first to share!</p>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Photo Modal -->
+    <div id="photoModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <div class="modal-body">
+          <img id="modalImage" src="" alt="" />
+          <div class="photo-details">
+            <div class="photo-info">
+              <strong id="modalUsername"></strong>
+              <span id="modalTime"></span>
+            </div>
+            <p id="modalCaption"></p>
+
+            <div class="comments-section">
+              <h4>Comments</h4>
+              <div id="commentsList" class="comments-list"></div>
+
+              <form id="commentForm" class="comment-form">
+                <input
+                  type="text"
+                  id="commentInput"
+                  placeholder="Add a comment..."
+                  required
+                />
+                <button type="submit" class="btn-primary">Send</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/client.js"></script>
+  </body>
+</html>

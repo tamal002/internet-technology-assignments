@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Photo Sharing - Login</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="login-box">
+        <h1>📸 Photo Sharing App</h1>
+        <p class="subtitle">Share photos instantly with friends and groups</p>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <input
+              type="text"
+              id="username"
+              placeholder="Enter your username"
+              required
+              autocomplete="off"
+            />
+          </div>
+          <button type="submit" class="btn-primary">Join Now</button>
+        </form>
+
+        <div class="features">
+          <div class="feature">
+            <span class="icon">🖼️</span>
+            <span>Share Photos</span>
+          </div>
+          <div class="feature">
+            <span class="icon">👥</span>
+            <span>Create Groups</span>
+          </div>
+          <div class="feature">
+            <span class="icon">💬</span>
+            <span>Add Comments</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById("loginForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const username = document.getElementById("username").value.trim();
+
+        if (username) {
+          localStorage.setItem("username", username);
+          window.location.href = "/app";
+        }
+      });
+    </script>
+  </body>
+</html>
