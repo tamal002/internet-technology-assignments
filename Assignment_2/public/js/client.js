@@ -5,6 +5,8 @@ const socket = io();
 let currentUsername = localStorage.getItem("username");
 let currentPhotoId = null;
 let currentFilter = "all";
+let photosCache = {}; // Cache for photos with their latest comments
+let joinedGroups = JSON.parse(localStorage.getItem("joinedGroups") || "[]");
 
 // Check if user is logged in
 if (!currentUsername) {
@@ -76,12 +78,16 @@ document.getElementById("createGroupBtn").addEventListener("click", () => {
 
 // Load existing photos
 socket.on("load-photos", (photos) => {
-  photos.forEach((photo) => addPhotoToGrid(photo));
+  photos.forEach((photo) => {
+    photosCache[photo.id] = photo; // Cache the photo
+    addPhotoToGrid(photo);
+  });
   updateNoPhotosMessage();
 });
 
 // New photo received
 socket.on("new-photo", (photo) => {
+  photosCache[photo.id] = photo; // Cache the photo
   addPhotoToGrid(photo);
   updateNoPhotosMessage();
   showNotification(`${photo.username} shared a new photo`);
@@ -111,7 +117,10 @@ function addPhotoToGrid(photo) {
         </div>
     `;
 
-  photoCard.addEventListener("click", () => openPhotoModal(photo));
+  photoCard.addEventListener("click", () => {
+    const cachedPhoto = photosCache[photo.id] || photo; // Get cached photo with latest comments
+    openPhotoModal(cachedPhoto);
+  });
 
   photoGrid.insertBefore(photoCard, photoGrid.firstChild);
 }
@@ -129,10 +138,15 @@ function openPhotoModal(photo) {
   document.getElementById("modalCaption").textContent =
     photo.caption || "No caption";
 
-  // Load comments
+  // Load comments from the photo object
   const commentsList = document.getElementById("commentsList");
   commentsList.innerHTML = "";
-  photo.comments.forEach((comment) => addCommentToList(comment));
+  
+  if (photo.comments && photo.comments.length > 0) {
+    photo.comments.forEach((comment) => addCommentToList(comment));
+  } else {
+    commentsList.innerHTML = '<p style="color: #999; text-align: center;">No comments yet</p>';
+  }
 
   modal.style.display = "flex";
 }
@@ -169,7 +183,23 @@ document.getElementById("commentForm").addEventListener("submit", (e) => {
 
 // New comment received
 socket.on("new-comment", (data) => {
+  console.log("Comment received:", {
+    photoId: data.photoId,
+    comment: data.comment,
+  });
+
+  // Update cached photo with new comment
+  if (photosCache[data.photoId]) {
+    photosCache[data.photoId].comments.push(data.comment);
+    console.log(
+      "Cache updated. Total comments:",
+      photosCache[data.photoId].comments.length,
+    );
+  }
+
+  // If viewing this photo in modal, add comment to list
   if (currentPhotoId === data.photoId) {
+    console.log("Photo is currently viewing in modal, adding comment");
     addCommentToList(data.comment);
   }
 
@@ -177,14 +207,23 @@ socket.on("new-comment", (data) => {
   const photoCard = document.querySelector(`[data-photo-id="${data.photoId}"]`);
   if (photoCard) {
     const commentCount = photoCard.querySelector(".photo-actions span");
-    const currentCount = parseInt(commentCount.textContent.match(/\d+/)[0]);
-    commentCount.textContent = `💬 ${currentCount + 1} comments`;
+    if (commentCount) {
+      const match = commentCount.textContent.match(/\d+/);
+      const currentCount = match ? parseInt(match[0]) : 0;
+      commentCount.textContent = `💬 ${currentCount + 1} comments`;
+    }
   }
 });
 
 // Add comment to list
 function addCommentToList(comment) {
   const commentsList = document.getElementById("commentsList");
+
+  // Remove "No comments yet" message if it exists
+  const noCommentsMsg = commentsList.querySelector('p[style*="color: #999"]');
+  if (noCommentsMsg) {
+    noCommentsMsg.remove();
+  }
 
   const commentDiv = document.createElement("div");
   commentDiv.className = "comment";
@@ -246,9 +285,24 @@ socket.on("groups-list", (groups) => {
 
   // Add join functionality
   document.querySelectorAll(".btn-join").forEach((btn) => {
+    const groupName = btn.dataset.group;
+    
+    // Check if already joined and update button state
+    if (joinedGroups.includes(groupName)) {
+      btn.textContent = "Joined";
+      btn.disabled = true;
+    }
+    
     btn.addEventListener("click", (e) => {
       const groupName = e.target.dataset.group;
       socket.emit("join-group", groupName);
+      
+      // Save to localStorage
+      if (!joinedGroups.includes(groupName)) {
+        joinedGroups.push(groupName);
+        localStorage.setItem("joinedGroups", JSON.stringify(joinedGroups));
+      }
+      
       e.target.textContent = "Joined";
       e.target.disabled = true;
     });

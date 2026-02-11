@@ -53,6 +53,11 @@ const users = new Map(); // socketId -> {username, groups}
 const groups = new Map(); // groupName -> {members: Set, photos: Array}
 const photos = []; // Array of all shared photos
 
+// Initialize default groups
+groups.set("Friends", { members: new Set(), photos: [] });
+groups.set("Family", { members: new Set(), photos: [] });
+groups.set("Work", { members: new Set(), photos: [] });
+
 // Routes
 app.get("/", (req, res) => {
   res.render("index");
@@ -108,6 +113,10 @@ io.on("connection", (socket) => {
     // Send existing photos to new user
     socket.emit("load-photos", photos);
 
+    // Send groups list to new user
+    const groupsList = Array.from(groups.keys());
+    socket.emit("groups-list", groupsList);
+
     // Notify others
     socket.broadcast.emit("user-joined", { username, userId: socket.id });
 
@@ -117,10 +126,6 @@ io.on("connection", (socket) => {
       username: data.username,
     }));
     io.emit("users-list", usersList);
-
-    // Send groups list
-    const groupsList = Array.from(groups.keys());
-    io.emit("groups-list", groupsList);
   });
 
   // Create a new group
@@ -183,19 +188,17 @@ io.on("connection", (socket) => {
       };
 
       photo.comments.push(commentData);
+      console.log(
+        "Comment added to photo:",
+        photo.id,
+        "Total comments:",
+        photo.comments.length,
+      );
 
-      // Emit to appropriate audience
-      if (photo.group === "all") {
-        io.emit("new-comment", { photoId, comment: commentData });
-      } else if (groups.has(photo.group)) {
-        const group = groups.get(photo.group);
-        group.members.forEach((socketId) => {
-          io.to(socketId).emit("new-comment", {
-            photoId,
-            comment: commentData,
-          });
-        });
-      }
+      // Broadcast comment to ALL users (everyone should see all comments)
+      io.emit("new-comment", { photoId, comment: commentData });
+    } else {
+      console.log("Photo not found for comment:", photoId);
     }
   });
 
